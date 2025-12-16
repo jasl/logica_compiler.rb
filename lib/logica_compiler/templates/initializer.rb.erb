@@ -1,0 +1,28 @@
+strict = Rails.env.production?
+
+config =
+  begin
+    LogicaCompiler::Config.load!(root: Rails.root)
+  rescue Errno::ENOENT, Psych::SyntaxError => e
+    raise if strict
+
+    Rails.logger&.warn("[logica_compiler] config load failed (#{e.class}): #{e.message}")
+    LogicaCompiler::Config.new(config_path: "logica/config.yml", root: Rails.root)
+  end
+
+registry =
+  if !strict && !Rails.root.join("logica/config.yml").exist?
+    LogicaCompiler::Registry.unavailable(
+      message: "Missing logica/config.yml. Run `bundle exec rake logica_compiler:install` and then `bin/logica compile`."
+    )
+  else
+    LogicaCompiler::Registry.load(
+      manifest_path: config.manifest_path,
+      output_dir: config.output_dir_path,
+      strict:,
+    )
+  end
+
+Rails.application.config.x.logica ||= ActiveSupport::OrderedOptions.new
+Rails.application.config.x.logica.registry = registry
+Rails.application.config.x.logica.runner = LogicaCompiler::ActiveRecord::Runner.new(registry:)
