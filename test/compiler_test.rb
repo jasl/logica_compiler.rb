@@ -429,21 +429,4 @@ class CompilerTest < Minitest::Test
   end
 
   private
-
-  def with_env(updates)
-    previous = {}
-    updates.each do |k, v|
-      previous[k] = ENV.key?(k) ? ENV[k] : :__missing__
-      v.nil? ? ENV.delete(k) : ENV[k] = v
-    end
-    yield
-  ensure
-    previous.each do |k, v|
-      v == :__missing__ ? ENV.delete(k) : ENV[k] = v
-    end
-  end
-
-  def venv_bin_dir
-    Gem.win_platform? ? "Scripts" : "bin"
-  end
 end

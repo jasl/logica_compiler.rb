@@ -45,7 +45,7 @@ module LogicaCompiler
         @stderr.puts "  - Re-run with FORCE=1 to overwrite conflicting files"
         @stderr.puts "  - Or manually merge the templates and re-run"
         @stderr.puts "Template source: #{template_root}"
-        raise "LogicaCompiler install aborted due to conflicts (FORCE=1 to overwrite)."
+        raise InstallError, "LogicaCompiler install aborted due to conflicts (FORCE=1 to overwrite)."
       end
 
       say("done", "Installed LogicaCompiler integration into #{@root}")
@@ -182,7 +182,8 @@ module LogicaCompiler
 
     def ensure_gitignore_block
       path = @root.join(".gitignore")
-      existing = path.exist? ? path.read : +""
+      existed = path.exist?
+      existing = existed ? path.read : +""
 
       block = render_template("gitignore_block")
       return say("identical", path.to_s) if existing.include?("/logica/compiled/*")
@@ -192,8 +193,8 @@ module LogicaCompiler
       updated << block
 
       write_file(path, updated, mode: nil)
-      say(path.exist? ? "update" : "create", path.to_s)
-      :update
+      say(existed ? "update" : "create", path.to_s)
+      existed ? :update : :create
     end
 
     def say(status, message)

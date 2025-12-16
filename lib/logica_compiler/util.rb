@@ -4,6 +4,15 @@ module LogicaCompiler
   module Util
     module_function
 
+    def path_like?(value)
+      s = value.to_s
+      return false if s.empty?
+      return true if s.start_with?(".", "/", "~")
+
+      separators = [File::SEPARATOR, File::ALT_SEPARATOR].compact.uniq
+      separators.any? { |sep| s.include?(sep) }
+    end
+
     def venv_bin_dir
       Gem.win_platform? ? "Scripts" : "bin"
     end

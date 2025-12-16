@@ -1,10 +1,7 @@
 # frozen_string_literal: true
 
 require_relative "logica_compiler/version"
-
-module LogicaCompiler
-  class Error < StandardError; end
-end
+require_relative "logica_compiler/errors"
 
 require_relative "logica_compiler/config"
 require_relative "logica_compiler/sql_safety"

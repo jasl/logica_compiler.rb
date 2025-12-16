@@ -103,7 +103,7 @@ module LogicaCompiler
 
       # If LOGICA_BIN points to a venv-installed executable, infer the venv python and ask pip metadata.
       bin = @config.logica_bin.to_s
-      if bin.include?(File::SEPARATOR) || bin.start_with?(".")
+      if Util.path_like?(bin)
         venv_dir = File.expand_path("..", File.dirname(bin))
         python = File.join(venv_dir, Util.venv_bin_dir, "python")
         if File.executable?(python)
@@ -174,7 +174,7 @@ module LogicaCompiler
       effective_source = ensure_engine_directive(program_source)
       cmd = [@config.logica_bin, "-", "print", predicate.to_s]
       stdout, stderr, status = run_cmd_with_timeout!(cmd, stdin_data: effective_source, timeout:)
-      raise "Logica compile failed: #{stderr}" unless status.success?
+      raise CompileError, "Logica compile failed: #{stderr}" unless status.success?
 
       stdout
     end

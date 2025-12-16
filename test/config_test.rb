@@ -66,19 +66,6 @@ class ConfigTest < Minitest::Test
 
   private
 
-  def with_env(updates)
-    previous = {}
-    updates.each do |k, v|
-      previous[k] = ENV.key?(k) ? ENV[k] : :__missing__
-      v.nil? ? ENV.delete(k) : ENV[k] = v
-    end
-    yield
-  ensure
-    previous.each do |k, v|
-      v == :__missing__ ? ENV.delete(k) : ENV[k] = v
-    end
-  end
-
   def write_min_config!(root)
     FileUtils.mkdir_p(root.join("logica"))
     root.join("logica/config.yml").write(<<~YAML)
@@ -89,9 +76,5 @@ class ConfigTest < Minitest::Test
           program: logica/programs/hello_world.l
           predicate: Greet
     YAML
-  end
-
-  def venv_bin_dir
-    Gem.win_platform? ? "Scripts" : "bin"
   end
 end

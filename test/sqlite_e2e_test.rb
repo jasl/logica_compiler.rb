@@ -69,15 +69,4 @@ class SqliteE2eTest < Minitest::Test
       assert_equal [1, "a"], result.rows.first
     end
   end
-
-  private
-
-  def logica_available?(bin)
-    return File.executable?(bin) if bin.include?(File::SEPARATOR) || bin.start_with?(".")
-
-    ENV.fetch("PATH", "").split(File::PATH_SEPARATOR).any? do |dir|
-      path = File.join(dir, bin)
-      File.file?(path) && File.executable?(path)
-    end
-  end
 end
