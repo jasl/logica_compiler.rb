@@ -316,36 +316,40 @@ class CompilerTest < Minitest::Test
   end
 
   def test_logica_version_can_be_inferred_from_venv_python_when_available
-    Dir.mktmpdir do |dir|
-      root = Pathname(dir)
+    # Config treats LOGICA_BIN as a hard override, so clear it to ensure this test exercises
+    # the venv-inference path from config.yml's logica_bin setting (and stays CI-independent).
+    with_env("LOGICA_BIN" => nil) do
+      Dir.mktmpdir do |dir|
+        root = Pathname(dir)
 
-      venv_dir = root.join("tmp/logica_venv")
-      FileUtils.mkdir_p(venv_dir.join(venv_bin_dir))
+        venv_dir = root.join("tmp/logica_venv")
+        FileUtils.mkdir_p(venv_dir.join(venv_bin_dir))
 
-      python = venv_dir.join(venv_bin_dir, "python")
-      python.write("#!/usr/bin/env ruby\nputs \"stub\"\n")
-      FileUtils.chmod(0o755, python)
+        python = venv_dir.join(venv_bin_dir, "python")
+        python.write("#!/usr/bin/env ruby\nputs \"stub\"\n")
+        FileUtils.chmod(0o755, python)
 
-      logica = venv_dir.join(venv_bin_dir, "logica")
-      logica.write("#!/usr/bin/env ruby\nputs \"stub\"\n")
-      FileUtils.chmod(0o755, logica)
+        logica = venv_dir.join(venv_bin_dir, "logica")
+        logica.write("#!/usr/bin/env ruby\nputs \"stub\"\n")
+        FileUtils.chmod(0o755, logica)
 
-      FileUtils.mkdir_p(root.join("logica"))
-      root.join("logica/config.yml").write(<<~YAML)
-        engine: postgres
-        output_dir: logica/compiled
-        logica_bin: #{logica}
-        queries: {}
-      YAML
+        FileUtils.mkdir_p(root.join("logica"))
+        root.join("logica/config.yml").write(<<~YAML)
+          engine: postgres
+          output_dir: logica/compiled
+          logica_bin: #{logica}
+          queries: {}
+        YAML
 
-      config = LogicaCompiler::Config.load!("logica/config.yml", root:)
-      compiler = LogicaCompiler::Compiler.new(config:)
+        config = LogicaCompiler::Config.load!("logica/config.yml", root:)
+        compiler = LogicaCompiler::Compiler.new(config:)
 
-      status = Minitest::Mock.new
-      status.expect(:success?, true)
+        status = Minitest::Mock.new
+        status.expect(:success?, true)
 
-      compiler.stub(:run_cmd_with_timeout!, ["1.3.0\n", "", status]) do
-        assert_equal "1.3.0", compiler.logica_version
+        compiler.stub(:run_cmd_with_timeout!, ["1.3.0\n", "", status]) do
+          assert_equal "1.3.0", compiler.logica_version
+        end
       end
     end
   end
