@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     name: Ruby ${{ matrix.ruby }}
     env:
-      LOGICA_BIN: logica
       LOGICA_E2E_REQUIRED: "1"
     strategy:
       matrix:
