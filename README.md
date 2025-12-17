@@ -22,7 +22,7 @@ This keeps your web process fast (no runtime compilation) and avoids running a s
 
 ```ruby
 # Gemfile
-gem "logica_compiler", github: "jasl/logica_compiler.rb", require: "logica_compiler"
+gem "logica_compiler"
 ```
 
 Then:
