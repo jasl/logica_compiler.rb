@@ -110,8 +110,7 @@ Rails.application.config.x.logica.runner.exec(:hello_world, statement_timeout: n
 Run gem tests:
 
 ```bash
-cd vendor/logica_compiler
-bundle install
+bundle install --all
 bundle exec rake
 ```
 
